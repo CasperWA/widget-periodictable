@@ -80,18 +80,20 @@ export
 class MCPTableView extends DOMWidgetView {
   // TODO: move template to external file to make it more readable, see
   // http://codebeerstartups.com/2012/12/how-to-improve-templates-in-backbone-js-learning-backbone-js/
-  tableTemplate =  _.template( '<% for (let elementRow of elementTable)'+
-  ' { print("<div class=\'periodic-table-row\'>"); for (let elementName of elementRow)'+
-  ' { if ( (elementName === "") || (elementName == "*" ) || (elementName == "#" ) ) { %>' +
-  '  <span class="periodic-table-empty noselect" style="width: <%= elementWidth %>; height: <%= elementWidth %>;"><%= elementName %></span>' + '<% } else { %>' +
-  '  <span class="<% if (disabledElements.includes(elementName))' +
-  ' { print(" periodic-table-disabled"); } else { print(" periodic-table-entry"); }%> '+
-  ' noselect element-<%= elementName %><% if (selectedElements.includes(elementName) && ' +
-  '(! disabledElements.includes(elementName)) ) { print(" elementOn"); } %>" '+
-  'style="width: <%= elementWidth %>; height: <%= elementWidth %>; border-color: <%= borderColor %>; background-color: <% if (disabledElements.includes(elementName)) {print(disabledColor)}' +
-  'else if (selectedElements.includes(elementName)) { i = selectedElements.indexOf(elementName); print(selectedColors[selectedStates[i]]);} else{print(unselectedColor)} %>" '+
-  // 'title="state: <% if (selectedElements.includes(elementName)) { i = selectedElements.indexOf(elementName); print(selectedStates[i]);} '+
-  // 'else if (disabledElements.includes(elementName)){print("disabled");} else {print("unselected");} %>" ><% '+
+  tableTemplate = _.template('<% for (let elementRow of elementTable) { ' +
+  'print("<div class=\'periodic-table-row\'>"); ' +
+  'for (let elementName of elementRow) {' +
+  ' if ( (elementName === "") || (elementName == "*" ) || (elementName == "#" ) ) { %>' +
+  '  <span class="periodic-table-empty noselect" style="width: <%= elementWidth %>; height: <%= elementWidth %>;"><%= elementName %></span>' +
+  '<% } else { %>' +
+  '  <span class="<% if (disabledElements.includes(elementName)) { print(" periodic-table-disabled"); } else { print(" periodic-table-entry"); } %> ' +
+  ' noselect element-<%= elementName %><% if (selectedElements.includes(elementName) && (! disabledElements.includes(elementName)) ) { print("elementOn"); } %>" ' +
+  'style="width: <%= elementWidth %>; height: <%= elementWidth %>; border-color: <%= borderColor %>; ' +
+  'background-color: <% if (selectedElements.includes(elementName)) { ' +
+  'i = selectedElements.indexOf(elementName); if (disabledElements.includes(elementName)) { print(disabledColors[selectedStates[i]]) } else { print(selectedColors[selectedStates[i]]) }; ' +
+  '} else { if disabledElements.includes(elementName)) { print(disabledUnselectedColor) } else { print(unselectedColor) } } %>" ' +
+  // 'title="state: <% if (selectedElements.includes(elementName)) { i = selectedElements.indexOf(elementName); print(selectedStates[i]); } '+
+  // 'else if (disabledElements.includes(elementName)){print("disabled");} else {print("unselected");} %>" '+
   '><% print(displayNamesReplacements[elementName] || elementName); %></span>' +
   '<% } }; print("</div>"); } %>');
 
@@ -187,7 +189,8 @@ class MCPTableView extends DOMWidgetView {
     //         changed from python
     var selectedElements = this.model.get('selected_elements');
     var disabledElements = this.model.get('disabled_elements');
-    var disabledColor = this.model.get('disabled_color');
+    var disabledColors = this.model.get('disabled_colors');
+    var disabledUnselectedColor = this.model.get('disabled_unselected_color');
     var unselectedColor = this.model.get('unselected_color');
     var selectedColors = this.model.get('selected_colors');
     var newSelectedColors = selectedColors.slice();
@@ -247,7 +250,8 @@ class MCPTableView extends DOMWidgetView {
       displayNamesReplacements: this.model.get('display_names_replacements'),
       selectedElements: newSelectedElements,
       disabledElements: disabledElements,
-      disabledColor: disabledColor,
+      disabledColors: disabledColors,
+      disabledUnselectedColor: disabledUnselectedColor,
       unselectedColor: unselectedColor,
       selectedColors: newSelectedColors,
       selectedStates: newSelectedStates,

@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Copyright (c) Dou Du.
-# Distributed under the terms of the Modified BSD License.
+"""
+Copyright (c) Dou Du.
+Distributed under the terms of the Modified BSD License.
 
+A Periodic Table widget for use in Jupyter Notebooks.
 """
-TODO: Add module docstring
-"""
+
+from copy import deepcopy
+import re
+from traitlets import Unicode, Int, List, Dict, observe, validate, TraitError, Dict, Bool
 
 from ipywidgets import DOMWidget, Layout
-from traitlets import Unicode, Int, List, Dict, observe, validate, TraitError, Dict, Bool
+
 from ._frontend import module_name, module_version
-from copy import deepcopy
+from .utils import faded_color
+
 
 class PTableWidget(DOMWidget):
     """Periodic Table Widget
@@ -25,7 +30,8 @@ class PTableWidget(DOMWidget):
     selected_elements = Dict({}).tag(sync=True)
     disabled_elements = List([]).tag(sync=True)
     display_names_replacements = Dict({}).tag(sync=True)
-    disabled_color = Unicode('gray').tag(sync=True)
+    disabled_colors = List([]).tag(sync=True)
+    disabled_unselected_color = Unicode('gray').tag(sync=True)
     unselected_color = Unicode('pink').tag(sync=True)
     states = Int(1).tag(sync=True)
     selected_colors = List([]).tag(sync=True)
@@ -44,17 +50,29 @@ class PTableWidget(DOMWidget):
         "Th", "Pa", "U", "Np", "Pu", "Am","Cm", "Bk",  "Cf", "Es", "Fm", "Md", "No", "Lr"
     ]).tag(sync=True)
 
-    def __init__(self, states = 1, selected_elements = {}, disabled_elements = [], disabled_color = 'gray', unselected_color = 'pink', selected_colors = ["#a6cee3", "#b2df8a", "#fdbf6f", "#6a3d9a", "#b15928", "#e31a1c", "#1f78b4", "#33a02c", "#ff7f00", "#cab2d6", "#ffff99"], border_color = "#cc7777", width = "38px", layout = None):
+    _STANDARD_COLORS = [
+        "#a6cee3", "#b2df8a", "#fdbf6f", "#6a3d9a", "#b15928", "#e31a1c", "#1f78b4",
+        "#33a02c", "#ff7f00", "#cab2d6", "#ffff99",
+    ]
+
+    def __init__(
+        self,
+        states = None,
+        selected_elements = None,
+        unselected_color = None,
+        selected_colors = None,
+        border_color = None,
+        width = None,
+        layout = None,
+    ):
         super(PTableWidget, self).__init__()
-        self.states = states
-        self.disabled_color = disabled_color
-        self.disabled_elements = disabled_elements
-        self.unselected_color = unselected_color
-        self.selected_colors = selected_colors
-        self.selected_elements = selected_elements
-        self.border_color = border_color
-        self.width = width 
-        
+        self.states = states if states else 1
+        self.unselected_color = unselected_color if unselected_color else 'pink'
+        self.selected_colors = selected_colors if selected_colors else self._STANDARD_COLORS
+        self.selected_elements = selected_elements if selected_elements else {}
+        self.border_color = border_color if border_color else "#cc7777"
+        self.width = width if width else "38px"
+
         if layout is not None:
             self.layout = layout 
 
@@ -62,7 +80,9 @@ class PTableWidget(DOMWidget):
             additional_colors = ["#a6cee3", "#b2df8a", "#fdbf6f", "#6a3d9a", "#b15928", "#e31a1c", "#1f78b4", "#33a02c", "#ff7f00", "#cab2d6", "#ffff99"]
             self.selected_colors = selected_colors + additional_colors * (1 + (states - len(selected_colors)) // len(additional_colors))
             self.selected_colors = self.selected_colors[:states]
-
+        self.disabled_colors = [faded_color(i) for i in self.selected_colors]
+        self.disabled_unselected_color = faded_color(self.unselected_color)
+        self.disabled_elements = []
 
     def set_element_state(self, elementName, state):
         if elementName not in self.allElements:
@@ -82,12 +102,6 @@ class PTableWidget(DOMWidget):
                 raise TraitError('State value is wrong')
         return proposal['value']
 
-    @observe('disabled_elements')
-    def _disabledList_change(self, change):
-        for i in change['new']:
-            if i in self.selected_elements:
-                del self.selected_elements[i]
-
     @observe('disabled')
     def _disabled_change(self, change):
         if change['new']:
@@ -106,6 +120,7 @@ class PTableWidget(DOMWidget):
                 self.selected_colors = self.selected_colors[:change["new"]]
             elif len(self.selected_colors) > change["new"]:
                 self.selected_colors = self.selected_colors[:change["new"]]
+            self.disabled_colors = [faded_color(i) for i in self.selected_colors]
 
     def get_elements_by_state(self, state):
         if state not in range(self.states):
