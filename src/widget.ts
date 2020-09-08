@@ -90,8 +90,8 @@ class MCPTableView extends DOMWidgetView {
   ' noselect element-<%= elementName %><% if (selectedElements.includes(elementName) && (! disabledElements.includes(elementName)) ) { print("elementOn"); } %>" ' +
   'style="width: <%= elementWidth %>; height: <%= elementWidth %>; border-color: <%= borderColor %>; ' +
   'background-color: <% if (selectedElements.includes(elementName)) { ' +
-  'i = selectedElements.indexOf(elementName); if (disabledElements.includes(elementName)) { print(disabledColors[selectedStates[i]]) } else { print(selectedColors[selectedStates[i]]) }; ' +
-  '} else { if disabledElements.includes(elementName)) { print(disabledUnselectedColor) } else { print(unselectedColor) } } %>" ' +
+  'i = selectedElements.indexOf(elementName); if (disabledElements.includes(elementName)) { print(disabledColors[selectedStates[i]]) } else { print(selectedColors[selectedStates[i]]) } ' +
+  '} else { if (disabledElements.includes(elementName)) { print(disabledUnselectedColor) } else { print(unselectedColor) } } %>" ' +
   // 'title="state: <% if (selectedElements.includes(elementName)) { i = selectedElements.indexOf(elementName); print(selectedStates[i]); } '+
   // 'else if (disabledElements.includes(elementName)){print("disabled");} else {print("unselected");} %>" '+
   '><% print(displayNamesReplacements[elementName] || elementName); %></span>' +
@@ -193,6 +193,7 @@ class MCPTableView extends DOMWidgetView {
     var disabledUnselectedColor = this.model.get('disabled_unselected_color');
     var unselectedColor = this.model.get('unselected_color');
     var selectedColors = this.model.get('selected_colors');
+    var newDisabledColors = disabledColors.slice();
     var newSelectedColors = selectedColors.slice();
     var elementWidth = this.model.get('width');
     var borderColor = this.model.get('border_color');
@@ -250,7 +251,7 @@ class MCPTableView extends DOMWidgetView {
       displayNamesReplacements: this.model.get('display_names_replacements'),
       selectedElements: newSelectedElements,
       disabledElements: disabledElements,
-      disabledColors: disabledColors,
+      disabledColors: newDisabledColors,
       disabledUnselectedColor: disabledUnselectedColor,
       unselectedColor: unselectedColor,
       selectedColors: newSelectedColors,

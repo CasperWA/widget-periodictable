@@ -24,7 +24,7 @@ HTML_COLOR_MAP = {
 }
 
 
-def faded_color(color: str, opacity: float = 0.38) -> str:
+def faded_color(color: str, opacity: float = 0.38, as_rgb: bool = False) -> str:
     """Calculate rgb with X % opacity (default: 38 %) of color (white background)"""
     if re.match(r"#[a-fA-F0-9]{6}", color):
         # Hex color
@@ -46,8 +46,10 @@ def faded_color(color: str, opacity: float = 0.38) -> str:
             # Return the color right back, un-faded
             return color
 
-    color = [
-        255 - opacity * (255 - i)
+    color = tuple(
+        round(255 - opacity * (255 - i))
         for i in color
-    ]
-    return "".join(f"rgb{color!r}".split(" "))
+    )
+    if as_rgb:
+        return "".join(f"rgb{color!r}".split(" "))
+    return "#{}".format("".join([hex(i)[2:] for i in color]))

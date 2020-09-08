@@ -9,10 +9,10 @@ A Periodic Table widget for use in Jupyter Notebooks.
 """
 
 from copy import deepcopy
-import re
-from traitlets import Unicode, Int, List, Dict, observe, validate, TraitError, Dict, Bool
+import typing
 
 from ipywidgets import DOMWidget, Layout
+from traitlets import Unicode, Int, List, Dict, observe, validate, TraitError, Dict, Bool
 
 from ._frontend import module_name, module_version
 from .utils import faded_color
@@ -57,13 +57,13 @@ class PTableWidget(DOMWidget):
 
     def __init__(
         self,
-        states = None,
-        selected_elements = None,
-        unselected_color = None,
-        selected_colors = None,
-        border_color = None,
-        width = None,
-        layout = None,
+        states: int = None,
+        selected_elements: list = None,
+        unselected_color: str = None,
+        selected_colors: list = None,
+        border_color: str = None,
+        width: str = None,
+        layout: typing.Union[Layout, dict] = None,
     ):
         super(PTableWidget, self).__init__()
         self.states = states if states else 1
