@@ -40,9 +40,7 @@ var elementTable: string[][] = [
 let elementList: string[] = [];
 for (let elementRow of elementTable) {
   for (let elementName of elementRow) {
-    if ( (elementName === "") || (elementName == "*" ) ) {
-    }
-    else {
+    if (! ( (elementName === "") || (elementName == "*" ) ) ) {
       elementList.push(elementName);
     }
   }
@@ -86,16 +84,14 @@ class MCPTableView extends DOMWidgetView {
   'if ( (elementName === "") || (elementName == "*" ) || (elementName == "#" ) ) { %>' +
   '  <span class="periodic-table-empty noselect" style="width: <%= elementWidth %>; height: <%= elementWidth %>;"><%= elementName %></span>' +
   '<% } else { %>' +
-  '  <span class="<% if (disabledElements.includes(elementName)) { print("periodic-table-disabled"); } else { print("periodic-table-entry"); } %> ' +
-  'noselect element-<%= elementName %><% if (selectedElements.includes(elementName) && (! disabledElements.includes(elementName)) ) { print("elementOn"); } %>" ' +
+  '  <span class="<% print("periodic-table-entry"); %> ' +
+  'noselect element-<%= elementName %><% if (selectedElements.includes(elementName)) { print("elementOn"); } %>" ' +
   'style="width: <%= elementWidth %>; height: <%= elementWidth %>; border-color: <%= borderColor %>; ' +
-  'background-color: <% if (selectedElements.includes(elementName)) { ' +
-  'i = selectedElements.indexOf(elementName); if (disabledElements.includes(elementName)) { print(disabledColors[selectedStates[i]]) } else { print(selectedColors[selectedStates[i]]) } ' +
-  '} else { if (disabledElements.includes(elementName)) { print(disabledUnselectedColor) } else { print(unselectedColor) } } %>" ' +
-  // 'title="state: <% if (selectedElements.includes(elementName)) { i = selectedElements.indexOf(elementName); print(selectedStates[i]); } '+
-  // 'else if (disabledElements.includes(elementName)){print("disabled");} else {print("unselected");} %>" '+
+  'background-color: <% if (selectedElements.includes(elementName)) { i = selectedElements.indexOf(elementName); ' +
+  'print(selectedColors[selectedStates[i]]); } else { print(unselectedColor); } %>"' +
+  '<% if (disabledElements.includes(elementName)) { print(" disabled"); } %>' +
   '><% print(displayNamesReplacements[elementName] || elementName); %></span>' +
-  '<% } }; print("</div>"); } %>');
+  '<% } } print("</div>"); } %>');
 
   render() {
     // I render the widget
@@ -146,30 +142,26 @@ class MCPTableView extends DOMWidgetView {
       var num = newList.indexOf(elementName);
 
       if (isOn) {
-        // remove the element from the selected_elements
-
-        if (newStatesList[num] < states -1){
+        if (newStatesList[num] < states -1) {
+          // Update state to state + 1
           newStatesList[num]++;
           currentList[elementName] = newStatesList[num];
-        }
-        else{
+        } else {
+          // Remove the element from the selected_elements
           newList = _.without(newList, elementName);
           newStatesList.splice(num, 1);
           delete currentList[elementName];
           // Swap CSS state
           event.target.classList.remove('elementOn');
         }
-      }
-      else if (!isDisabled) {
+      } else if (!isDisabled) {
         // add the element from the selected_elements
         newList.push(elementName);
         newStatesList.push(0);
         currentList[elementName] = 0;
         // Swap CSS state
         event.target.classList.add('elementOn');
-      }
-
-      else{
+      } else {
         return;
       }
 
@@ -268,7 +260,6 @@ class MCPTableView extends DOMWidgetView {
 
     for (let i = 0; i < a.length; i++) {
       (a[i] as HTMLElement).style.border = "1px solid " + color;
-      
     }
 
   }
