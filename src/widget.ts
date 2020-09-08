@@ -82,12 +82,12 @@ class MCPTableView extends DOMWidgetView {
   // http://codebeerstartups.com/2012/12/how-to-improve-templates-in-backbone-js-learning-backbone-js/
   tableTemplate = _.template('<% for (let elementRow of elementTable) { ' +
   'print("<div class=\'periodic-table-row\'>"); ' +
-  'for (let elementName of elementRow) {' +
-  ' if ( (elementName === "") || (elementName == "*" ) || (elementName == "#" ) ) { %>' +
+  'for (let elementName of elementRow) { ' +
+  'if ( (elementName === "") || (elementName == "*" ) || (elementName == "#" ) ) { %>' +
   '  <span class="periodic-table-empty noselect" style="width: <%= elementWidth %>; height: <%= elementWidth %>;"><%= elementName %></span>' +
   '<% } else { %>' +
-  '  <span class="<% if (disabledElements.includes(elementName)) { print(" periodic-table-disabled"); } else { print(" periodic-table-entry"); } %> ' +
-  ' noselect element-<%= elementName %><% if (selectedElements.includes(elementName) && (! disabledElements.includes(elementName)) ) { print("elementOn"); } %>" ' +
+  '  <span class="<% if (disabledElements.includes(elementName)) { print("periodic-table-disabled"); } else { print("periodic-table-entry"); } %> ' +
+  'noselect element-<%= elementName %><% if (selectedElements.includes(elementName) && (! disabledElements.includes(elementName)) ) { print("elementOn"); } %>" ' +
   'style="width: <%= elementWidth %>; height: <%= elementWidth %>; border-color: <%= borderColor %>; ' +
   'background-color: <% if (selectedElements.includes(elementName)) { ' +
   'i = selectedElements.indexOf(elementName); if (disabledElements.includes(elementName)) { print(disabledColors[selectedStates[i]]) } else { print(selectedColors[selectedStates[i]]) } ' +
