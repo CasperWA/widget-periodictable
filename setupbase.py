@@ -9,6 +9,7 @@ This file originates from the 'jupyter-packaging' package, and
 contains a set of useful utilities for including npm packages
 within a Python package.
 """
+# pylint: disable=wrong-import-position
 from collections import defaultdict
 from os.path import join as pjoin
 import io
@@ -23,7 +24,8 @@ import sys
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+if os.path.exists('MANIFEST'):
+    os.remove('MANIFEST')
 
 
 from distutils.cmd import Command
@@ -42,6 +44,7 @@ except ImportError:
 if sys.platform == 'win32':
     from subprocess import list2cmdline
 else:
+
     def list2cmdline(cmd_list):
         return ' '.join(map(pipes.quote, cmd_list))
 
@@ -58,10 +61,12 @@ node_modules = pjoin(HERE, 'node_modules')
 
 SEPARATORS = os.sep if os.altsep is None else os.sep + os.altsep
 
-npm_path = ':'.join([
-    pjoin(HERE, 'node_modules', '.bin'),
-    os.environ.get('PATH', os.defpath),
-])
+npm_path = ':'.join(
+    [
+        pjoin(HERE, 'node_modules', '.bin'),
+        os.environ.get('PATH', os.defpath),
+    ]
+)
 
 if "--skip-npm" in sys.argv:
     print("Skipping npm install as requested.")
@@ -75,6 +80,7 @@ else:
 # Public Functions
 # ---------------------------------------------------------------------------
 
+
 def get_version(file, name='__version__'):
     """Get the version of the package from the given file by
     executing it and extracting the given `name`.
@@ -87,8 +93,7 @@ def get_version(file, name='__version__'):
 
 
 def ensure_python(specs):
-    """Given a list of range specifiers for python, ensure compatibility.
-    """
+    """Given a list of range specifiers for python, ensure compatibility."""
     if not isinstance(specs, (list, tuple)):
         specs = [specs]
     v = sys.version_info
@@ -130,13 +135,15 @@ class bdist_egg_disabled(bdist_egg):
     Prevents setup.py install performing setuptools' default easy_install,
     which it should never ever do.
     """
+
     def run(self):
-        sys.exit("Aborting implicit building of eggs. Use `pip install .` "
-                 " to install from source.")
+        sys.exit(
+            "Aborting implicit building of eggs. Use `pip install .` "
+            " to install from source."
+        )
 
 
-def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
-        data_files_spec=None):
+def create_cmdclass(prerelease_cmd=None, package_data_spec=None, data_files_spec=None):
     """Create a command class with the given optional prerelease class.
 
     Parameters
@@ -193,18 +200,6 @@ def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
     return cmdclass
 
 
-def command_for_func(func):
-    """Create a command that calls the given function."""
-
-    class FuncCommand(BaseCommand):
-
-        def run(self):
-            func()
-            update_package_data(self.distribution)
-
-    return FuncCommand
-
-
 def run(cmd, **kwargs):
     """Echo a command before running it.  Defaults to repo as cwd"""
     log.info('> ' + list2cmdline(cmd))
@@ -214,16 +209,18 @@ def run(cmd, **kwargs):
         cmd = shlex.split(cmd)
     cmd_path = which(cmd[0])
     if not cmd_path:
-        sys.exit("Aborting. Could not find cmd (%s) in path. "
-                 "If command is not expected to be in user's path, "
-                 "use an absolute path." % cmd[0])
+        sys.exit(
+            "Aborting. Could not find cmd (%s) in path. "
+            "If command is not expected to be in user's path, "
+            "use an absolute path." % cmd[0]
+        )
     cmd[0] = cmd_path
     return subprocess.check_call(cmd, **kwargs)
 
 
 def is_stale(target, source):
     """Test whether the target file/directory is stale based on the source
-       file/directory.
+    file/directory.
     """
     if not os.path.exists(target):
         return True
@@ -233,6 +230,7 @@ def is_stale(target, source):
 
 class BaseCommand(Command):
     """Empty command because Command needs subclasses to override too much"""
+
     user_options = []
 
     def initialize_options(self):
@@ -246,6 +244,17 @@ class BaseCommand(Command):
 
     def get_outputs(self):
         return []
+
+
+def command_for_func(func):
+    """Create a command that calls the given function."""
+
+    class FuncCommand(BaseCommand):
+        def run(self):
+            func()
+            update_package_data(self.distribution)
+
+    return FuncCommand
 
 
 def combine_commands(*commands):
@@ -268,6 +277,7 @@ def combine_commands(*commands):
         def run(self):
             for c in self.commands:
                 c.run()
+
     return CombinedCommand
 
 
@@ -302,7 +312,7 @@ def recursive_mtime(path, newest=True):
     if os.path.isfile(path):
         return mtime(path)
     current_extreme = None
-    for dirname, dirnames, filenames in os.walk(path, topdown=False):
+    for dirname, _, filenames in os.walk(path, topdown=False):
         for filename in filenames:
             mt = mtime(pjoin(dirname, filename))
             if newest:  # Put outside of loop?
@@ -318,7 +328,9 @@ def mtime(path):
     return os.stat(path).st_mtime
 
 
-def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build', force=False, npm=None):
+def install_npm(  # pylint: disable=too-many-arguments
+    path=None, build_dir=None, source_dir=None, build_cmd='build', force=False, npm=None
+):
     """Return a Command for managing an npm installation.
 
     Note: The command is skipped if the `--skip-npm` flag is used.
@@ -358,14 +370,19 @@ def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build', f
                     npm_cmd = ['npm']
 
             if not which(npm_cmd[0]):
-                log.error("`{0}` unavailable.  If you're running this command "
-                          "using sudo, make sure `{0}` is available to sudo"
-                          .format(npm_cmd[0]))
+                log.error(
+                    "`{0}` unavailable.  If you're running this command "
+                    "using sudo, make sure `{0}` is available to sudo".format(
+                        npm_cmd[0]
+                    )
+                )
                 return
 
             if force or is_stale(node_modules, pjoin(node_package, 'package.json')):
-                log.info('Installing build dependencies with npm.  This may '
-                         'take a while...')
+                log.info(
+                    'Installing build dependencies with npm.  This may '
+                    'take a while...'
+                )
                 run(npm_cmd + ['install'], cwd=node_package)
             if build_dir and source_dir and not force:
                 should_build = is_stale(build_dir, source_dir)
@@ -411,8 +428,7 @@ def which(cmd, mode=os.F_OK | os.X_OK, path=None):
     # Additionally check that `file` is not a directory, as on Windows
     # directories pass the os.access check.
     def _access_check(fn, mode):
-        return (os.path.exists(fn) and os.access(fn, mode) and
-                not os.path.isdir(fn))
+        return os.path.exists(fn) and os.access(fn, mode) and not os.path.isdir(fn)
 
     # Short circuit. If we're given a full path which matches the mode
     # and it exists, we're done here.
@@ -440,12 +456,12 @@ def which(cmd, mode=os.F_OK | os.X_OK, path=None):
         files = [cmd]
 
     seen = set()
-    for dir in path:
-        dir = os.path.normcase(dir)
-        if dir not in seen:
-            seen.add(dir)
+    for directory in path:
+        directory = os.path.normcase(directory)
+        if directory not in seen:
+            seen.add(directory)
             for thefile in files:
-                name = os.path.join(dir, thefile)
+                name = os.path.join(directory, thefile)
                 if _access_check(name, mode):
                     return name
     return None
@@ -466,8 +482,8 @@ def _wrap_command(cmds, cls, strict=True):
     strict: boolean, optional
         Wether to raise errors when a pre-command fails.
     """
-    class WrappedCommand(cls):
 
+    class WrappedCommand(cls):
         def run(self):
             if not getattr(self, 'uninstall', None):
                 try:
@@ -475,21 +491,20 @@ def _wrap_command(cmds, cls, strict=True):
                 except Exception:
                     if strict:
                         raise
-                    else:
-                        pass
+
             # update package data
             update_package_data(self.distribution)
 
             result = cls.run(self)
             return result
+
     return WrappedCommand
 
 
 def _get_file_handler(package_data_spec, data_files_spec):
-    """Get a package_data and data_files handler command.
-    """
-    class FileHandler(BaseCommand):
+    """Get a package_data and data_files handler command."""
 
+    class FileHandler(BaseCommand):
         def run(self):
             package_data = self.distribution.package_data
             package_spec = package_data_spec or dict()
@@ -508,7 +523,7 @@ def _glob_pjoin(*parts):
     """Join paths for glob processing"""
     if parts[0] in ('.', ''):
         parts = parts[1:]
-    return pjoin(*parts).replace(os.sep, '/')
+    return pjoin(*parts).replace(os.sep, '/')  # pylin: disable=no-value-for-parameter
 
 
 def _get_data_files(data_specs, existing, top=HERE):
