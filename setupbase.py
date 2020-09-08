@@ -523,7 +523,7 @@ def _glob_pjoin(*parts):
     """Join paths for glob processing"""
     if parts[0] in ('.', ''):
         parts = parts[1:]
-    return pjoin(*parts).replace(os.sep, '/')  # pylin: disable=no-value-for-parameter
+    return pjoin(*parts).replace(os.sep, '/')  # pylint: disable=no-value-for-parameter
 
 
 def _get_data_files(data_specs, existing, top=HERE):
