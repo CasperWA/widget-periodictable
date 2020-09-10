@@ -15,7 +15,7 @@ from ipywidgets import DOMWidget, Layout
 from traitlets import Unicode, Int, List, Dict, observe, validate, TraitError, Bool
 
 from ._frontend import module_name, module_version
-from .utils import faded_color
+from .utils import faded_color, CHEMICAL_ELEMENTS
 
 
 class PTableWidget(DOMWidget):
@@ -37,128 +37,7 @@ class PTableWidget(DOMWidget):
     border_color = Unicode('#cc7777').tag(sync=True)
     disabled = Bool(False, help='Enable or disable widget.').tag(sync=True)
     width = Unicode('38px').tag(sync=True)
-    all_elements = List(
-        [
-            'H',
-            'He',
-            'Li',
-            'Be',
-            'B',
-            'C',
-            'N',
-            'O',
-            'F',
-            'Ne',
-            'Na',
-            'Mg',
-            'Al',
-            'Si',
-            'P',
-            'S',
-            'Cl',
-            'Ar',
-            'K',
-            'Ca',
-            'Sc',
-            'Ti',
-            'V',
-            'Cr',
-            'Mn',
-            'Fe',
-            'Co',
-            'Ni',
-            'Cu',
-            'Zn',
-            'Ga',
-            'Ge',
-            'As',
-            'Se',
-            'Br',
-            'Kr',
-            'Rb',
-            'Sr',
-            'Y',
-            'Zr',
-            'Nb',
-            'Mo',
-            'Tc',
-            'Ru',
-            'Rh',
-            'Pd',
-            'Ag',
-            'Cd',
-            'In',
-            'Sn',
-            'Sb',
-            'Te',
-            'I',
-            'Xe',
-            'Cs',
-            'Ba',
-            'Hf',
-            'Ta',
-            'W',
-            'Re',
-            'Os',
-            'Ir',
-            'Pt',
-            'Au',
-            'Hg',
-            'Tl',
-            'Pb',
-            'Bi',
-            'Po',
-            'At',
-            'Rn',
-            'Fr',
-            'Ra',
-            'Rf',
-            'Db',
-            'Sg',
-            'Bh',
-            'Hs',
-            'Mt',
-            'Ds',
-            'Rg',
-            'Cn',
-            'Nh',
-            'Fi',
-            'Mc',
-            'Lv',
-            'Ts',
-            'Og',
-            'La',
-            'Ce',
-            'Pr',
-            'Nd',
-            'Pm',
-            'Sm',
-            'Eu',
-            'Gd',
-            'Tb',
-            'Dy',
-            'Ho',
-            'Er',
-            'Tm',
-            'Yb',
-            'Lu',
-            'Ac',
-            'Th',
-            'Pa',
-            'U',
-            'Np',
-            'Pu',
-            'Am',
-            'Cm',
-            'Bk',
-            'Cf',
-            'Es',
-            'Fm',
-            'Md',
-            'No',
-            'Lr',
-        ]
-    ).tag(sync=True)
+    all_elements = List(CHEMICAL_ELEMENTS).tag(sync=True)
 
     _STANDARD_COLORS = [
         '#a6cee3',
@@ -198,21 +77,8 @@ class PTableWidget(DOMWidget):
             self.layout = layout
 
         if len(selected_colors) < states:
-            additional_colors = [
-                '#a6cee3',
-                '#b2df8a',
-                '#fdbf6f',
-                '#6a3d9a',
-                '#b15928',
-                '#e31a1c',
-                '#1f78b4',
-                '#33a02c',
-                '#ff7f00',
-                '#cab2d6',
-                '#ffff99',
-            ]
-            self.selected_colors = selected_colors + additional_colors * (
-                1 + (states - len(selected_colors)) // len(additional_colors)
+            self.selected_colors = selected_colors + self._STANDARD_COLORS * (
+                1 + (states - len(selected_colors)) // len(self._STANDARD_COLORS)
             )
             self.selected_colors = self.selected_colors[:states]
         self.disabled_colors = [faded_color(i) for i in self.selected_colors]
@@ -245,22 +111,10 @@ class PTableWidget(DOMWidget):
     @observe('states')
     def _states_change(self, change):
         if len(self.selected_colors) < change['new']:
-            additional_colors = [
-                '#a6cee3',
-                '#b2df8a',
-                '#fdbf6f',
-                '#6a3d9a',
-                '#b15928',
-                '#e31a1c',
-                '#1f78b4',
-                '#33a02c',
-                '#ff7f00',
-                '#cab2d6',
-                '#ffff99',
-            ]
-            self.selected_colors = self.selected_colors + additional_colors * (
+            self.selected_colors = self.selected_colors + self._STANDARD_COLORS * (
                 1
-                + (change['new'] - len(self.selected_colors)) // len(additional_colors)
+                + (change['new'] - len(self.selected_colors))
+                // len(self._STANDARD_COLORS)
             )
             self.selected_colors = self.selected_colors[: change['new']]
         elif len(self.selected_colors) > change['new']:
